@@ -97,13 +97,13 @@ for i in sorted_list: #add all the points one at a time to the triangulation
 
 """ puts triangulation on canvas """
 colors={0:'cyan',1:'blue', 2:'yellow',3:'green',4:'red',5:'magenta'}
-temp=0
+color_number=0
 for i in triangles:
     if any([x in i for x in bigtriangle]):#this chooses not to render the triangles that include the points in bigtriangle
         #canvas.create_polygon(*[x for sub in i for x in sub], outline='blue',fill='') #code to see the deleted triangles
         continue
     canvas.create_polygon(*[x for sub in i for x in sub], outline='blue',fill='')# to make colors different set fill=colors[temp])
-    temp=(temp+1)%6
+    color_number=(color_number+1)%6 #cycles through the colors
     
 canvas.pack()
 root.mainloop()
