@@ -51,7 +51,7 @@ def in_incircle(point,triangle):
                  ])
     return np.linalg.det(M)>0#if the determinant is positive the points are in the circumcircle
 
-def yorder(coordinate_list):
+def y_order(coordinate_list):#used to sort points by y coordinate
     return(coordinate_list[1])
 
 
@@ -65,34 +65,27 @@ canvas=tk.Canvas(root,bg="white",height=360,width=360)
 """ bowyer watson algorithm https://en.wikipedia.org/wiki/Bowyer%E2%80%93Watson_algorithm """
 
 number_of_points=100
-points=[]
 triangles=[]
 limit=360
 
-#sorted_list=[(random.randrange(limit),random.randrange(limit)) for i in range(0,number_of_points)] 
-sorted_list=[(12,12),(300,12),(180,180),(50,200)]#,(12,348)]
-sorted_list.sort(key=yorder) #sorts the list to make the algorithm faster
+#sorted_list=[(random.randrange(limit),random.randrange(limit)) for i in range(0,number_of_points)] #inactive code for huge random points
+sorted_list=[(12,12),(300,12),(180,180),(50,200),(12,348)] #small collection of test points
+sorted_list.sort(key=y_order) #sorts the list to make the algorithm faster
 
-names=['A','B','C','D','E','F','G','H','I']
-
+""" creates a triangle containing all points based on window size"""
 bigtriangle={(-0.5*canvas.winfo_reqheight(),0),(0.5*canvas.winfo_reqwidth(),2*canvas.winfo_reqheight()),(1.5*canvas.winfo_reqheight(),0)}
-#must be large enough to completely contain all the points in pointList
-triangles=[bigtriangle]
+"""must be large enough to completely contain all the points in pointList"""
+triangles=[bigtriangle] #list of triangles in the mesh
 
 for i in sorted_list: #add all the points one at a time to the triangulation
-    bad_triangles=[]
-    points.append(i)
-    print(i)
+    bad_triangles=[]#list of triangles that violate the delauny condition for the next point
     for j in triangles:#first find all the triangles that are no longer valid due to the insertion      
-        #print(j)
         if in_incircle(i,j):
             bad_triangles.append(j)
-            #print(j)
             triangles.remove(j)
     polygon=[]
     for j in bad_triangles: #find the boundary of the polygonal hole
         for k in unique([{x,y} for x in j for y in j if x!=y]):#iterates through the edges of the triangles
-            #print(k)
             if sum([k.issubset(l) for l in bad_triangles])==1:#the sum should be 1 if k is an edge in only one triangle
                 polygon.append(k) #if an edge is only in one triangle it is on the outside
     print(polygon)
@@ -100,17 +93,16 @@ for i in sorted_list: #add all the points one at a time to the triangulation
         j.add(i)
         triangles.append(j) #adds the new triangles to the triangulation
     #x=input()
-    print(triangles)
-#print([x for x in triangles if not any([y in x for y in bigtriangle])])
+#print([x for x in triangles if not any([y in x for y in bigtriangle])]) #meant to print the remaining triangulation
 
 """ puts triangulation on canvas """
 colors={0:'cyan',1:'blue', 2:'yellow',3:'green',4:'red',5:'magenta'}
 temp=0
 for i in triangles:
-    if any([x in i for x in bigtriangle]):
-        #canvas.create_polygon(*[x for sub in i for x in sub], outline='blue',fill='')
+    if any([x in i for x in bigtriangle]):#this chooses not to render the triangles that include the points in bigtriangle
+        #canvas.create_polygon(*[x for sub in i for x in sub], outline='blue',fill='') #code to see the deleted triangles
         continue
-    canvas.create_polygon(*[x for sub in i for x in sub], outline='blue',fill='')#colors[temp])
+    canvas.create_polygon(*[x for sub in i for x in sub], outline='blue',fill='')# to make colors different set fill=colors[temp])
     temp=(temp+1)%6
     
 canvas.pack()
